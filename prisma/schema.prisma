@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Product {
+  id           String   @id @default(uuid())
+  title        String
+  description  String
+  price        Float
+  mrp          Float?
+  discount     Int?
+  fabric       String
+  category     String
+  images       String   // Comma-separated image paths
+  stock        Int      @default(5)
+  color        String
+  occasion     String
+  rating       Float    @default(4.8)
+  reviewsCount Int      @default(12)
+  featured     Boolean  @default(false)
+  isNew        Boolean  @default(false)
+  tags         String?  // e.g. "bestseller,trending"
+  design       String?  // Butti, Floral, Jaal, Paisley, Minimal etc.
+  borderType   String?  // Zari Border, Cut Work etc.
+  blouseType   String?  // Readymade, Running, Without Blouse
+  zari         String?  // Gold Zari, Silver Zari, No Zari
+  colorFamily  String?  // pastel, jewel, earthy, metallic etc.
+  sizes        String?  // e.g. "5.5m,6m,6.5m"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Order {
+  id              String   @id @default(uuid())
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  shippingAddress String
+  items           String   // JSON string of items: [{id, title, price, quantity, blouseStyle}]
+  totalAmount     Float
+  isGift          Boolean  @default(false)
+  giftMessage     String?
+  status          String   @default("Pending") // Pending, Processing, Shipped, Delivered
+  createdAt       DateTime @default(now())
+}
+
+model Admin {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  phone     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+}
+
+model AbandonedSession {
+  id           String   @id @default(uuid())
+  phone        String
+  name         String?
+  productTitle String
+  productId    String
+  productImage String
+  createdAt    DateTime @default(now())
+  recovered    Boolean  @default(false)
+}
