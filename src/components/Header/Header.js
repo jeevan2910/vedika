@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { useCustomer } from '@/context/CustomerContext';
 import { ShoppingBag, Search, Heart, User, LogOut, X, Menu, ChevronDown } from 'lucide-react';
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { label: 'New Arrivals', href: '/shop?sort=newest' },
   {
     label: 'Sarees',
+    href: '/shop?category=Sarees',
     dropdown: [
       { label: 'Kanjeevaram Silk', href: '/shop?category=Sarees&fabric=Kanjeevaram Silk', desc: 'Pure mulberry silk, gold zari' },
       { label: 'Banarasi Brocade', href: '/shop?category=Sarees&fabric=Banarasi Silk', desc: 'Woven in Varanasi' },
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   },
   {
     label: 'Kurtis & Sets',
+    href: '/shop?category=Kurtis',
     dropdown: [
       { label: 'Short Kurtis', href: '/shop?category=Kurtis&design=Short Kurti', desc: 'Chic everyday short tunics' },
       { label: 'Kurti Sets', href: '/shop?category=Kurtis&design=Kurti Set', desc: 'Premium Kurti with Pants/Palazzos' },
@@ -31,6 +33,7 @@ const NAV_ITEMS = [
   },
   {
     label: 'Dresses & Lehengas',
+    href: '/shop?category=Dresses',
     dropdown: [
       { label: 'Ethnic Dresses', href: '/shop?category=Dresses', desc: 'Flared gowns & Anarkali dresses' },
       { label: 'Designer Lehengas', href: '/shop?category=Lehengas', desc: 'Opulent wedding & festive lehengas' },
@@ -41,24 +44,19 @@ const NAV_ITEMS = [
 
 export default function Header({ onCartOpen, onLoginOpen }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { cartCount } = useCart();
   const { customer, logout, isLoggedIn } = useCustomer();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const searchRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  useEffect(() => {
-    if (searchOpen && searchRef.current) searchRef.current.focus();
-  }, [searchOpen]);
 
   useEffect(() => {
     setMobileOpen(false);
@@ -68,8 +66,7 @@ export default function Header({ onCartOpen, onLoginOpen }) {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/shop?q=${encodeURIComponent(searchQuery.trim())}`;
-      setSearchOpen(false);
+      router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
@@ -91,91 +88,132 @@ export default function Header({ onCartOpen, onLoginOpen }) {
         </div>
       </div>
 
-      {/* Main Header */}
-      <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
-        {/* Mobile Menu Toggle */}
-        <button className={styles.mobileMenuBtn} onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
-
-        {/* Logo */}
-        <Link href="/" className={styles.logo}>
-          <img src="/images/logo.png" alt="Vedhika" className={styles.logoImg} />
-          <div className={styles.logoText}>
-            <span className={styles.logoName}>Vedhika</span>
-            <span className={styles.logoSub}>Thread Affairs</span>
-          </div>
-        </Link>
-
-        {/* Desktop Navigation */}
-        <nav className={styles.nav}>
-          {NAV_ITEMS.map((item) => (
-            <div
-              key={item.label}
-              className={styles.navItem}
-              onMouseEnter={() => item.dropdown && setOpenDropdown(item.label)}
-              onMouseLeave={() => setOpenDropdown(null)}
-            >
-              {item.dropdown ? (
-                <>
-                  <button className={`${styles.navLink} ${item.dropdown?.some(d => pathname === d.href) ? styles.navLinkActive : ''}`}>
-                    {item.label}
-                    <ChevronDown size={13} className={styles.chevron} />
-                  </button>
-                  {openDropdown === item.label && (
-                    <div className={styles.dropdown}>
-                      {item.dropdown.map((d) => (
-                        <Link key={d.href} href={d.href} className={styles.dropdownItem}>
-                          <span className={styles.dropdownLabel}>{d.label}</span>
-                          <span className={styles.dropdownDesc}>{d.desc}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <Link
-                  href={item.href}
-                  className={`${styles.navLink} ${pathname === item.href ? styles.navLinkActive : ''}`}
-                >
-                  {item.label}
-                </Link>
-              )}
-            </div>
-          ))}
-        </nav>
-
-        {/* Right Icons */}
-        <div className={styles.actions}>
-          <button className={styles.iconBtn} onClick={() => setSearchOpen(true)} aria-label="Search">
-            <Search size={20} />
+      {/* Main Header Container wrapper */}
+      <div className={`${styles.headerWrapper} ${scrolled ? styles.headerWrapperScrolled : ''}`}>
+        
+        {/* Main Header Row */}
+        <header className={styles.header}>
+          {/* Mobile Menu Toggle (keep fallback toggle just in case) */}
+          <button className={styles.mobileMenuBtn} onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
+            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
-          <Link href="/wishlist" className={styles.iconBtn} aria-label="Wishlist">
-            <Heart size={20} />
+
+          {/* Logo */}
+          <Link href="/" className={styles.logo}>
+            <img src="/images/logo.png" alt="Vedhika" className={styles.logoImg} />
+            <div className={styles.logoText}>
+              <span className={styles.logoName}>Vedhika</span>
+              <span className={styles.logoSub}>Thread Affairs</span>
+            </div>
           </Link>
-          <button className={styles.iconBtn} onClick={onCartOpen} aria-label="Cart" style={{ position: 'relative' }}>
-            <ShoppingBag size={20} />
-            {cartCount > 0 && <span className={styles.badge}>{cartCount}</span>}
-          </button>
 
-          {isLoggedIn ? (
-            <div className={styles.userMenu}>
-              <span className={styles.userInfo} title={customer.phone}>
-                Hi, {customer.name || customer.phone.slice(-10)}
-              </span>
-              <button className={styles.iconBtn} onClick={logout} title="Log Out" aria-label="Log Out" style={{ width: '28px', height: '28px' }}>
-                <LogOut size={14} />
-              </button>
-            </div>
-          ) : (
-            <button className={styles.iconBtn} onClick={onLoginOpen} aria-label="Login">
-              <User size={20} />
+          {/* Desktop Navigation */}
+          <nav className={styles.nav}>
+            {NAV_ITEMS.map((item) => (
+              <div
+                key={item.label}
+                className={styles.navItem}
+                onMouseEnter={() => item.dropdown && setOpenDropdown(item.label)}
+                onMouseLeave={() => setOpenDropdown(null)}
+              >
+                {item.dropdown ? (
+                  <>
+                    <Link href={item.href} className={`${styles.navLink} ${pathname.startsWith(item.href) ? styles.navLinkActive : ''}`}>
+                      {item.label}
+                      <ChevronDown size={13} className={styles.chevron} />
+                    </Link>
+                    {openDropdown === item.label && (
+                      <div className={styles.dropdown}>
+                        {item.dropdown.map((d) => (
+                          <Link key={d.href} href={d.href} className={styles.dropdownItem}>
+                            <span className={styles.dropdownLabel}>{d.label}</span>
+                            <span className={styles.dropdownDesc}>{d.desc}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className={`${styles.navLink} ${pathname === item.href ? styles.navLinkActive : ''}`}
+                  >
+                    {item.label}
+                  </Link>
+                )}
+              </div>
+            ))}
+          </nav>
+
+          {/* Centered Desktop Search Bar (Myntra-style) */}
+          <form onSubmit={handleSearchSubmit} className={styles.desktopSearch}>
+            <Search size={16} className={styles.searchIconInline} />
+            <input 
+              type="text" 
+              placeholder="Search for products, brands and more..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={styles.desktopSearchInput}
+            />
+          </form>
+
+          {/* Right Action Icons */}
+          <div className={styles.actions}>
+            <Link href="/wishlist" className={styles.iconBtn} aria-label="Wishlist">
+              <Heart size={20} />
+            </Link>
+            <button className={styles.iconBtn} onClick={onCartOpen} aria-label="Cart" style={{ position: 'relative' }}>
+              <ShoppingBag size={20} />
+              {cartCount > 0 && <span className={styles.badge}>{cartCount}</span>}
             </button>
-          )}
-        </div>
-      </header>
 
-      {/* Mobile Nav Drawer */}
+            {isLoggedIn ? (
+              <div className={styles.userMenu}>
+                <span className={styles.userInfo} title={customer.phone}>
+                  Hi, {customer.name || customer.phone.slice(-10)}
+                </span>
+                <button className={styles.iconBtn} onClick={logout} title="Log Out" aria-label="Log Out" style={{ width: '28px', height: '28px' }}>
+                  <LogOut size={14} />
+                </button>
+              </div>
+            ) : (
+              <button className={styles.iconBtn} onClick={onLoginOpen} aria-label="Login">
+                <User size={20} />
+              </button>
+            )}
+          </div>
+        </header>
+
+        {/* Mobile Search Bar Row (Prominent Ajio/Myntra style) */}
+        <div className={styles.mobileSearchRow}>
+          <form onSubmit={handleSearchSubmit} className={styles.mobileSearchForm}>
+            <Search size={16} className={styles.searchIconInline} />
+            <input 
+              type="text" 
+              placeholder="Search for sarees, kurtis, dresses..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={styles.mobileSearchInput}
+            />
+          </form>
+        </div>
+
+        {/* Mobile Horizontal scrollable category options (User can see options clearly, no three-dashes menu required!) */}
+        <div className={styles.mobileCategoryScroll}>
+          {NAV_ITEMS.map((item, idx) => (
+            <Link 
+              key={idx} 
+              href={item.href} 
+              className={`${styles.mobileCategoryTab} ${pathname === item.href ? styles.mobileCategoryTabActive : ''}`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+
+      </div>
+
+      {/* Mobile Drawer (Backup/extra menu navigation) */}
       {mobileOpen && (
         <div className={styles.mobileDrawerOverlay} onClick={() => setMobileOpen(false)}>
           <div className={styles.mobileDrawer} onClick={(e) => e.stopPropagation()}>
@@ -211,34 +249,6 @@ export default function Header({ onCartOpen, onLoginOpen }) {
               <a href="https://wa.me/919030496646" target="_blank" rel="noopener noreferrer" className="btn-whatsapp" style={{ width: '100%', justifyContent: 'center' }}>
                 💬 Chat on WhatsApp
               </a>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Search Modal */}
-      {searchOpen && (
-        <div className={styles.searchOverlay} onClick={() => setSearchOpen(false)}>
-          <div className={styles.searchModal} onClick={(e) => e.stopPropagation()}>
-            <form onSubmit={handleSearchSubmit} className={styles.searchForm}>
-              <Search size={20} className={styles.searchIcon} />
-              <input
-                ref={searchRef}
-                type="text"
-                placeholder="Search for sarees, fabrics, occasions..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={styles.searchInput}
-              />
-              <button type="button" onClick={() => setSearchOpen(false)} className={styles.iconBtn}>
-                <X size={20} />
-              </button>
-            </form>
-            <div className={styles.searchSuggestions}>
-              <span className={styles.searchLabel}>Popular searches:</span>
-              {['Kanjeevaram', 'Banarasi', 'Bridal Sarees', 'Linen', 'Party Wear'].map((s) => (
-                <Link key={s} href={`/shop?q=${s}`} className={styles.searchTag} onClick={() => setSearchOpen(false)}>{s}</Link>
-              ))}
             </div>
           </div>
         </div>

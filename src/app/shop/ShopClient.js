@@ -100,14 +100,14 @@ export default function ShopClient({ initialProducts }) {
       params.set(key, value);
     }
     startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`);
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
     });
   };
 
   const clearAllFilters = () => {
     setSearchQuery('');
     startTransition(() => {
-      router.push(pathname);
+      router.push(pathname, { scroll: false });
     });
   };
 
