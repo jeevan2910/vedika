@@ -47,8 +47,13 @@ export default function ShopClient({ initialProducts }) {
   const selectedFamily = searchParams.get('family') || 'all';
 
   // Client-side search query state
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Sync client-side search query with URL changes (for header search submissions)
+  React.useEffect(() => {
+    setSearchQuery(searchParams.get('q') || '');
+  }, [searchParams]);
 
   // Filter options
   const categoriesList = ['Sarees', 'Kurtis', 'Dresses', 'Lehengas'];
@@ -470,71 +475,79 @@ export default function ShopClient({ initialProducts }) {
                 onChange={(e) => updateFilter('sort', e.target.value)}
                 className={`${styles.sortSelect} ${styles.desktopSort}`}
               >
-                <option value="newest">Newest First</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="rating">Customer Rating</option>
-              </select>
-            </div>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="rating">Customer Rating</option>
+                </select>
+              </div>
 
             {sortedProducts.length > 0 ? (
               <div className={styles.productsGrid}>
                 {sortedProducts.map((product) => {
-                  const wishlisted = isWishlisted(product.id);
-                  return (
-                    <div key={product.id} className={pageStyles.productCard} style={{ position: 'relative' }}>
-                      <Link href={`/product/${product.id}`} className={pageStyles.productImgWrap}>
-                        {product.isNew && <span className="badge-new" style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 2 }}>NEW</span>}
-                        {product.discount && <span className={pageStyles.productTag} style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 2, background: '#d32f2f' }}>{product.discount}% OFF</span>}
-                        <img
-                          src={product.images.split(',')[0]}
-                          alt={product.title}
-                          className={pageStyles.productImg}
-                          loading="lazy"
-                        />
-                      </Link>
-                      <button 
-                        onClick={() => toggle(product)}
-                        style={{
-                          position: 'absolute',
-                          top: '10px',
-                          right: '10px',
-                          zIndex: 3,
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '50%',
-                          background: 'white',
-                          border: '1px solid var(--border-light)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer',
-                          color: wishlisted ? '#d32f2f' : 'var(--text-muted)',
-                          boxShadow: 'var(--shadow-sm)',
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        <Heart size={16} fill={wishlisted ? '#d32f2f' : 'none'} />
-                      </button>
-                      <div className={pageStyles.productInfo}>
-                        <span className={pageStyles.productFabric}>{product.fabric}</span>
-                        <Link href={`/product/${product.id}`} className={pageStyles.productTitle} style={{ fontSize: '0.95rem', fontWeight: '600', minHeight: '44px', textDecoration: 'none' }}>
-                          {product.title}
-                        </Link>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px' }}>
-                          <span className={pageStyles.productPrice}>₹{product.price.toLocaleString('en-IN')}</span>
-                          {product.mrp && product.mrp > product.price && (
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', textDecoration: 'line-through' }}>
-                              ₹{product.mrp.toLocaleString('en-IN')}
-                            </span>
-                          )}
-                        </div>
-                        <span style={{ fontSize: '0.78rem', color: 'var(--accent)', marginTop: '8px', fontWeight: '600' }}>
-                          ★ {product.rating} ({product.reviewsCount} reviews)
-                        </span>
-                      </div>
-                    </div>
-                  );
+                   const wishlisted = isWishlisted(product.id);
+                   const discountPercent = product.discount || (product.mrp && product.mrp > product.price ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0);
+                   return (
+                     <div key={product.id} className={pageStyles.myntraProductCard} style={{ position: 'relative', flex: 'unset' }}>
+                       <Link href={`/product/${product.id}`} className={pageStyles.myntraImgWrap}>
+                         {product.isNew && <span className={pageStyles.badgeNew}>NEW</span>}
+                         <img
+                           src={product.images.split(',')[0]}
+                           alt={product.title}
+                           className={pageStyles.myntraProductImg}
+                           loading="lazy"
+                         />
+                         
+                         {/* Rating Tag overlaying image */}
+                         <div className={pageStyles.ratingBadge}>
+                           <span>{product.rating}</span>
+                           <Plus size={10} style={{ display: 'none' }} /> {/* dummy just to verify icons */}
+                           <svg width="10" height="10" viewBox="0 0 24 24" fill="#149253" stroke="none" style={{ color: '#149253' }}><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                           <span className={pageStyles.ratingDivider}>|</span>
+                           <span>{product.reviewsCount || 12}</span>
+                         </div>
+                       </Link>
+                       <button 
+                         onClick={() => toggle(product)}
+                         style={{
+                           position: 'absolute',
+                           top: '10px',
+                           right: '10px',
+                           zIndex: 10,
+                           width: '30px',
+                           height: '30px',
+                           borderRadius: '50%',
+                           background: 'rgba(255, 255, 255, 0.95)',
+                           border: '1px solid rgba(0,0,0,0.08)',
+                           display: 'flex',
+                           alignItems: 'center',
+                           justifyContent: 'center',
+                           cursor: 'pointer',
+                           color: wishlisted ? '#d32f2f' : 'var(--text-muted)',
+                           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                           transition: 'all 0.2s'
+                         }}
+                         aria-label="Toggle Wishlist"
+                       >
+                         <Heart size={14} fill={wishlisted ? '#d32f2f' : 'none'} />
+                       </button>
+                       
+                       <div className={pageStyles.myntraProductInfo}>
+                         <span className={pageStyles.myntraFabric}>{product.fabric}</span>
+                         <Link href={`/product/${product.id}`} className={pageStyles.myntraTitle} style={{ minHeight: '34px', textDecoration: 'none' }}>
+                           {product.title}
+                         </Link>
+                         <div className={pageStyles.myntraPriceRow}>
+                           <span className={pageStyles.myntraPrice}>₹{product.price.toLocaleString('en-IN')}</span>
+                           {product.mrp && product.mrp > product.price && (
+                             <>
+                               <span className={pageStyles.myntraMrp}>₹{product.mrp.toLocaleString('en-IN')}</span>
+                               <span className={pageStyles.myntraDiscount}>({discountPercent}% OFF)</span>
+                             </>
+                           )}
+                         </div>
+                       </div>
+                     </div>
+                   );
                 })}
               </div>
             ) : (

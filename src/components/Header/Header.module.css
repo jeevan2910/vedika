@@ -474,7 +474,7 @@
 
 @media (max-width: 768px) {
   .mobileMenuBtn {
-    display: none !important;
+    display: flex !important; /* Keep hamburger visible for categories drawer */
   }
   .userInfo {
     display: none; /* Hide user text info on mobile, profile tab handles it */
