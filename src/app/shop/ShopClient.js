@@ -395,13 +395,51 @@ export default function ShopClient({ initialProducts }) {
     );
   };
 
+  const getDynamicTitle = () => {
+    if (searchQuery) {
+      return `Results for "${searchQuery}"`;
+    }
+    if (selectedFabric !== 'all') {
+      return `${selectedFabric} Collection`;
+    }
+    if (selectedCategory !== 'all') {
+      if (selectedCategory === 'Kurtis') return 'Premium Kurtis & Sets';
+      if (selectedCategory === 'Dresses') return 'Designer Dresses';
+      if (selectedCategory === 'Lehengas') return 'Exquisite Lehengas';
+      return `${selectedCategory} Collection`;
+    }
+    if (selectedOccasion !== 'all') {
+      return `${selectedOccasion} Wear Collection`;
+    }
+    return 'The Weaving Catalog';
+  };
+
+  const getDynamicSubtitle = () => {
+    if (searchQuery) {
+      return `Explore search results matching your query`;
+    }
+    if (selectedFabric !== 'all') {
+      return `Handwoven with the finest yarns and traditional techniques`;
+    }
+    if (selectedCategory !== 'all') {
+      if (selectedCategory === 'Kurtis') return 'Elegant everyday tunics and coordinated sets';
+      if (selectedCategory === 'Dresses') return 'Modern silhouettes blended with traditional weaves';
+      if (selectedCategory === 'Lehengas') return 'Royal and opulent silhouettes for grand events';
+      return `Explore our exclusive ${selectedCategory.toLowerCase()} collection`;
+    }
+    if (selectedOccasion !== 'all') {
+      return `Curated selection of designer wear for your special ${selectedOccasion.toLowerCase()} moments`;
+    }
+    return 'Browse through our collection of premium handwoven sarees';
+  };
+
   return (
     <div className={styles.shopContainer}>
       <div className="container">
         {/* Header */}
         <div className={styles.header}>
-          <h1 className={styles.title}>The Weaving Catalog</h1>
-          <p className={styles.subtitle}>Browse through our collection of premium handwoven sarees</p>
+          <h1 className={styles.title}>{getDynamicTitle()}</h1>
+          <p className={styles.subtitle}>{getDynamicSubtitle()}</p>
         </div>
 
         {/* Shop By Occasion Circle Navigation */}
