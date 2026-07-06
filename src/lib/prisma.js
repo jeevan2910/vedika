@@ -1,6 +1,7 @@
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
-import { Pool, neonConfig } from '@neondatabase/serverless';
 import { PrismaNeon } from '@prisma/adapter-neon';
+import { neonConfig } from '@neondatabase/serverless';
 import ws from 'ws';
 
 // Enable WebSocket support for Node.js server runtimes
@@ -11,29 +12,30 @@ if (typeof window === 'undefined') {
 let prismaInstance;
 
 function createNeonPrismaClient() {
-  if (!process.env.DATABASE_URL) {
-    // Prevent crashes during static compilation/build if environment variables are not set
-    return new PrismaClient({
-      adapter: {
-        provider: 'postgres',
-        queryRaw: async () => [],
-        executeRaw: async () => 0
-      }
-    });
+  const connectionString = process.env.DATABASE_URL;
+
+  if (!connectionString) {
+    console.error('❌ DATABASE_URL is not set! Check your .env file.');
+    return new PrismaClient();
   }
 
-  const dbUrl = new URL(process.env.DATABASE_URL);
-  
-  // Inject database environment variables for Node-postgres fallback resolver
-  process.env.PGHOST = dbUrl.hostname;
-  process.env.PGUSER = dbUrl.username;
-  process.env.PGDATABASE = dbUrl.pathname.replace('/', '');
-  process.env.PGPASSWORD = dbUrl.password;
-  process.env.PGPORT = dbUrl.port || "5432";
+  console.log('✅ Creating Prisma client with Neon adapter...');
 
-  const pool = new Pool({ ssl: true });
-  const adapter = new PrismaNeon(pool);
+  // PrismaNeon in Prisma v7 takes a pool config object directly (not a Pool instance)
+  // It internally creates the Pool using the config passed here.
+  const adapter = new PrismaNeon({ connectionString });
   return new PrismaClient({ adapter });
+}
+
+function getPrisma() {
+  if (process.env.NODE_ENV === 'production') {
+    return createNeonPrismaClient();
+  }
+  // In development, reuse the instance across hot reloads
+  if (!global._prismaClient) {
+    global._prismaClient = createNeonPrismaClient();
+  }
+  return global._prismaClient;
 }
 
 export const prisma = new Proxy({}, {
@@ -42,15 +44,12 @@ export const prisma = new Proxy({}, {
       return undefined;
     }
     if (!prismaInstance) {
-      if (process.env.NODE_ENV === 'production') {
-        prismaInstance = createNeonPrismaClient();
-      } else {
-        if (!global.prisma) {
-          global.prisma = createNeonPrismaClient();
-        }
-        prismaInstance = global.prisma;
-      }
+      prismaInstance = getPrisma();
     }
-    return prismaInstance[prop];
+    const value = prismaInstance[prop];
+    if (typeof value === 'function') {
+      return value.bind(prismaInstance);
+    }
+    return value;
   }
 });
