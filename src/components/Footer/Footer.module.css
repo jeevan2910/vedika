@@ -322,32 +322,18 @@
 }
 
 /* Mobile — 1 column */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .main {
-    padding: 48px 0 40px;
+    display: none;
   }
-
-  .grid {
-    grid-template-columns: 1fr;
-    gap: 36px;
+  .bottom {
+    padding-bottom: 76px; /* Extra padding so the bottom nav does not block the copyright */
+    text-align: center;
   }
-
-  .brand {
-    grid-column: auto;
-  }
-
-  .desc {
-    max-width: 100%;
-  }
-
   .bottomInner {
     flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
-  }
-
-  .payments {
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
   }
 }
 

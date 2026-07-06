@@ -191,6 +191,9 @@ export default function AdminDashboard() {
               {item.icon} {item.label}
             </button>
           ))}
+          <button onClick={handleLogOut} className={`${styles.sidebarNavItem} ${styles.mobileOnlyLogout}`}>
+            <LogOut size={18} /> Log Out
+          </button>
         </nav>
         <div className={styles.sidebarFooter}>
           <button onClick={handleLogOut} className={styles.logoutBtn}><LogOut size={16} /> Log Out</button>

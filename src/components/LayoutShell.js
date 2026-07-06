@@ -2,7 +2,10 @@
 
 import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import HeaderWrapper from '@/components/Header/HeaderWrapper';
+import Header from '@/components/Header/Header';
+import CartDrawer from '@/components/CartDrawer/CartDrawer';
+import CustomerLoginModal from '@/components/CustomerLoginModal/CustomerLoginModal';
+import BottomNavigation from '@/components/BottomNavigation/BottomNavigation';
 import Footer from '@/components/Footer/Footer';
 import WhatsAppWidget from '@/components/WhatsAppWidget/WhatsAppWidget';
 import { useCustomer } from '@/context/CustomerContext';
@@ -21,6 +24,9 @@ export default function LayoutShell({ children }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const [cartOpen, setCartOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
 
   // Admin and API routes bypass the customer gate
   if (isAdmin || isApi) {
@@ -131,11 +137,20 @@ export default function LayoutShell({ children }) {
   // Logged-in customers browse normally
   return (
     <>
-      <HeaderWrapper />
-      <main style={{ minHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
+      <Header 
+        onCartOpen={() => setCartOpen(true)} 
+        onLoginOpen={() => setLoginOpen(true)} 
+      />
+      <main style={{ minHeight: '70vh', display: 'flex', flexDirection: 'column', paddingBottom: '30px' }}>
         {children}
       </main>
       <Footer />
+      <BottomNavigation 
+        onCartOpen={() => setCartOpen(true)} 
+        onLoginOpen={() => setLoginOpen(true)} 
+      />
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+      <CustomerLoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
       <WhatsAppWidget />
     </>
   );

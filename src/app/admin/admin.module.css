@@ -274,7 +274,8 @@
   background: white;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
-  overflow: hidden;
+  overflow-x: auto; /* Allow tables to scroll on mobile */
+  -webkit-overflow-scrolling: touch;
 }
 
 .tableHeader {
@@ -605,10 +606,95 @@
 
 /* ========= RESPONSIVE ========= */
 @media (max-width: 900px) {
-  .sidebar { display: none; }
-  .contentInner { padding: 24px 16px; }
-  .metricsGrid { grid-template-columns: repeat(2, 1fr); }
-  .formGrid { grid-template-columns: 1fr; }
-  .settingsGrid { grid-template-columns: 1fr; }
-  .pageHeader { flex-direction: column; gap: 16px; align-items: flex-start; }
+  .adminLayout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: auto;
+    background: #111;
+  }
+
+  .sidebarLogo {
+    display: none;
+  }
+
+  .sidebarNav {
+    flex-direction: row;
+    padding: 6px 12px;
+    gap: 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .sidebarNav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sidebarNavItem {
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    border-left: none;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    border-radius: 2px;
+  }
+
+  .sidebarNavItemActive {
+    border-bottom-color: var(--accent);
+    background: rgba(171,140,82,0.12);
+  }
+
+  .sidebarFooter {
+    display: none; /* We render logout inside the horizontal list */
+  }
+
+  .contentInner {
+    padding: 16px 12px;
+  }
+
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .metricCard {
+    padding: 16px;
+  }
+
+  .metricValue {
+    font-size: 1.4rem;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .settingsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+}
+
+.mobileOnlyLogout {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .mobileOnlyLogout {
+    display: flex;
+    color: #ff6b6b !important;
+  }
 }

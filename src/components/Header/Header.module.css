@@ -471,3 +471,12 @@
     justify-content: space-between;
   }
 }
+
+@media (max-width: 768px) {
+  .mobileMenuBtn {
+    display: none !important;
+  }
+  .userInfo {
+    display: none; /* Hide user text info on mobile, profile tab handles it */
+  }
+}

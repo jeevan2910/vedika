@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import HeroSlider from '@/components/HeroSlider/HeroSlider';
+import { Star } from 'lucide-react';
 import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,17 @@ export default async function Home() {
   } catch (e) {
     console.error('Failed to load products:', e);
   }
+
+  // Circular App Category items
+  const quickCategories = [
+    { name: 'Kanjeevaram', image: '/images/cat-kanjeevaram.webp', link: '/shop?fabric=Kanjeevaram Silk' },
+    { name: 'Banarasi', image: '/images/cat-banarasi.webp', link: '/shop?fabric=Banarasi Silk' },
+    { name: 'Linen', image: '/images/cat-linen.webp', link: '/shop?fabric=Linen' },
+    { name: 'Organza', image: '/images/cat-organza.webp', link: '/shop?fabric=Organza Silk' },
+    { name: 'Kurtis', image: '/images/saree-blue.webp', link: '/shop?category=Kurtis' },
+    { name: 'Dresses', image: '/images/saree-gold.webp', link: '/shop?category=Dresses' },
+    { name: 'Lehengas', image: '/images/saree-crimson.webp', link: '/shop?category=Lehengas' },
+  ];
 
   const categories = [
     { name: 'Kanjeevaram Silk', desc: 'Pure Mulberry Silk, Real Gold Zari', image: '/images/cat-kanjeevaram.webp', link: '/shop?fabric=Kanjeevaram Silk' },
@@ -36,13 +48,28 @@ export default async function Home() {
   ];
 
   return (
-    <div style={{ flexGrow: 1 }}>
+    <div style={{ flexGrow: 1, backgroundColor: '#fcfbf9' }}>
+      
+      {/* Circular Categories Strip (App UI style) */}
+      <div className={styles.circularStrip}>
+        <div className={styles.circularStripContainer}>
+          {quickCategories.map((c, i) => (
+            <Link href={c.link} key={i} className={styles.circleItem}>
+              <div className={styles.circleImgWrap}>
+                <img src={c.image} alt={c.name} className={styles.circleImg} />
+              </div>
+              <span className={styles.circleLabel}>{c.name}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       <HeroSlider />
 
-      {/* Categories */}
-      <section className={`section ${styles.categoriesSection}`}>
+      {/* Categories Grid */}
+      <section className={`section ${styles.categoriesSection}`} style={{ padding: '40px 0' }}>
         <div className="container">
-          <div className="section-header">
+          <div className="section-header" style={{ marginBottom: '32px' }}>
             <span className="section-tag">Shop by Category</span>
             <h2 className="section-title">Curated Heritage Collections</h2>
             <div className="divider-gold" />
@@ -62,32 +89,46 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* New Arrivals */}
-      <section className={`section ${styles.arrivalsSection}`}>
+      {/* New Arrivals (Horizontal Scroll Card List) */}
+      <section className={`section ${styles.arrivalsSection}`} style={{ padding: '40px 0' }}>
         <div className="container">
-          <div className={styles.arrivalsHeader}>
+          <div className={styles.arrivalsHeader} style={{ marginBottom: '24px' }}>
             <div>
               <span className="section-tag">Just In</span>
-              <h2 className="section-title">New Arrivals</h2>
+              <h2 className="section-title" style={{ fontSize: '1.8rem' }}>New Arrivals</h2>
             </div>
-            <Link href="/shop?sort=newest" className="btn-outline-gold">View All →</Link>
+            <Link href="/shop?sort=newest" className="btn-outline-gold" style={{ fontSize: '0.8rem', padding: '6px 14px' }}>View All →</Link>
           </div>
+          
           <div className={styles.arrivalsRow}>
             {newArrivals.map((p) => (
-              <Link href={`/product/${p.id}`} key={p.id} className={styles.productCard}>
-                <div className={styles.productImgWrap}>
-                  <span className="badge-new">NEW</span>
-                  <img src={p.images.split(',')[0]} alt={p.title} className={styles.productImg} loading="lazy" />
-                </div>
-                <div className={styles.productInfo}>
-                  <span className={styles.productFabric}>{p.fabric}</span>
-                  <h3 className={styles.productTitle}>{p.title}</h3>
-                  <div className={styles.productPriceRow}>
-                    <span className={styles.productPrice}>₹{p.price.toLocaleString('en-IN')}</span>
-                    {p.mrp && p.mrp > p.price && <span className={styles.productMrp}>₹{p.mrp.toLocaleString('en-IN')}</span>}
-                    {p.discount && <span className={styles.productDiscount}>{p.discount}% off</span>}
+              <Link href={`/product/${p.id}`} key={p.id} className={styles.myntraProductCard}>
+                <div className={styles.myntraImgWrap}>
+                  <span className={styles.badgeNew}>NEW</span>
+                  <img src={p.images.split(',')[0]} alt={p.title} className={styles.myntraProductImg} loading="lazy" />
+                  
+                  {/* Rating Tag overlaying image */}
+                  <div className={styles.ratingBadge}>
+                    <span>{p.rating}</span>
+                    <Star size={10} fill="currentColor" stroke="none" className={styles.starIcon} />
+                    <span className={styles.ratingDivider}>|</span>
+                    <span>{p.reviewsCount || 12}</span>
                   </div>
-                  <span className={styles.productRating}>★ {p.rating}</span>
+                </div>
+                
+                <div className={styles.myntraProductInfo}>
+                  <span className={styles.myntraFabric}>{p.fabric}</span>
+                  <h3 className={styles.myntraTitle}>{p.title}</h3>
+                  
+                  <div className={styles.myntraPriceRow}>
+                    <span className={styles.myntraPrice}>₹{p.price.toLocaleString('en-IN')}</span>
+                    {p.mrp && p.mrp > p.price && (
+                      <>
+                        <span className={styles.myntraMrp}>₹{p.mrp.toLocaleString('en-IN')}</span>
+                        <span className={styles.myntraDiscount}>({p.discount || Math.round(((p.mrp - p.price) / p.mrp) * 100)}% OFF)</span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </Link>
             ))}
@@ -95,35 +136,50 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className={`section ${styles.featuredSection}`}>
+      {/* Featured Products Grid */}
+      <section className={`section ${styles.featuredSection}`} style={{ padding: '50px 0' }}>
         <div className="container">
-          <div className="section-header">
+          <div className="section-header" style={{ marginBottom: '32px' }}>
             <span className="section-tag">Handpicked</span>
             <h2 className="section-title">Featured Collection</h2>
             <div className="divider-gold" />
           </div>
-          <div className={styles.featuredGrid}>
+          
+          <div className={styles.myntraFeaturedGrid}>
             {featuredProducts.map((p) => (
-              <Link href={`/product/${p.id}`} key={p.id} className={styles.productCard}>
-                <div className={styles.productImgWrap}>
+              <Link href={`/product/${p.id}`} key={p.id} className={styles.myntraProductCard}>
+                <div className={styles.myntraImgWrap}>
                   <span className={styles.productTag}>{p.category}</span>
-                  <img src={p.images.split(',')[0]} alt={p.title} className={styles.productImg} loading="lazy" />
-                </div>
-                <div className={styles.productInfo}>
-                  <span className={styles.productFabric}>{p.fabric}</span>
-                  <h3 className={styles.productTitle}>{p.title}</h3>
-                  <div className={styles.productPriceRow}>
-                    <span className={styles.productPrice}>₹{p.price.toLocaleString('en-IN')}</span>
-                    {p.mrp && p.mrp > p.price && <span className={styles.productMrp}>₹{p.mrp.toLocaleString('en-IN')}</span>}
+                  <img src={p.images.split(',')[0]} alt={p.title} className={styles.myntraProductImg} loading="lazy" />
+                  
+                  <div className={styles.ratingBadge}>
+                    <span>{p.rating}</span>
+                    <Star size={10} fill="currentColor" stroke="none" className={styles.starIcon} />
+                    <span className={styles.ratingDivider}>|</span>
+                    <span>{p.reviewsCount || 12}</span>
                   </div>
-                  <span className={styles.productRating}>★ {p.rating} ({p.reviewsCount})</span>
+                </div>
+                
+                <div className={styles.myntraProductInfo}>
+                  <span className={styles.myntraFabric}>{p.fabric}</span>
+                  <h3 className={styles.myntraTitle}>{p.title}</h3>
+                  
+                  <div className={styles.myntraPriceRow}>
+                    <span className={styles.myntraPrice}>₹{p.price.toLocaleString('en-IN')}</span>
+                    {p.mrp && p.mrp > p.price && (
+                      <>
+                        <span className={styles.myntraMrp}>₹{p.mrp.toLocaleString('en-IN')}</span>
+                        <span className={styles.myntraDiscount}>({p.discount || Math.round(((p.mrp - p.price) / p.mrp) * 100)}% OFF)</span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </Link>
             ))}
           </div>
-          <div style={{ textAlign: 'center', marginTop: '48px' }}>
-            <Link href="/shop" className="btn-accent">Shop the Collection →</Link>
+          
+          <div style={{ textAlign: 'center', marginTop: '40px' }}>
+            <Link href="/shop" className="btn-accent" style={{ padding: '12px 28px' }}>Shop the Collection →</Link>
           </div>
         </div>
       </section>
