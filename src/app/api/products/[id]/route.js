@@ -31,7 +31,10 @@ export async function PUT(request, { params }) {
 
     const { id } = await params;
     const body = await request.json();
-    const { title, description, price, fabric, category, images, stock, color, occasion, featured } = body;
+    const { 
+      title, description, price, fabric, category, images, stock, color, occasion, featured,
+      mrp, discount, tags, design, borderType, blouseType, zari, colorFamily, sizes, isNew
+    } = body;
 
     const currentProduct = await prisma.product.findUnique({
       where: { id }
@@ -47,13 +50,23 @@ export async function PUT(request, { params }) {
         title: title !== undefined ? title : currentProduct.title,
         description: description !== undefined ? description : currentProduct.description,
         price: price !== undefined ? parseFloat(price) : currentProduct.price,
+        mrp: mrp !== undefined ? (mrp ? parseFloat(mrp) : null) : currentProduct.mrp,
+        discount: discount !== undefined ? (discount ? parseInt(discount) : null) : currentProduct.discount,
         fabric: fabric !== undefined ? fabric : currentProduct.fabric,
         category: category !== undefined ? category : currentProduct.category,
         images: images !== undefined ? images : currentProduct.images,
         stock: stock !== undefined ? parseInt(stock) : currentProduct.stock,
         color: color !== undefined ? color : currentProduct.color,
         occasion: occasion !== undefined ? occasion : currentProduct.occasion,
-        featured: featured !== undefined ? (featured === true || featured === 'true') : currentProduct.featured
+        featured: featured !== undefined ? (featured === true || featured === 'true') : currentProduct.featured,
+        isNew: isNew !== undefined ? (isNew === true || isNew === 'true') : currentProduct.isNew,
+        tags: tags !== undefined ? tags : currentProduct.tags,
+        design: design !== undefined ? design : currentProduct.design,
+        borderType: borderType !== undefined ? borderType : currentProduct.borderType,
+        blouseType: blouseType !== undefined ? blouseType : currentProduct.blouseType,
+        zari: zari !== undefined ? zari : currentProduct.zari,
+        colorFamily: colorFamily !== undefined ? colorFamily : currentProduct.colorFamily,
+        sizes: sizes !== undefined ? sizes : currentProduct.sizes
       }
     });
 

@@ -54,7 +54,10 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { title, description, price, fabric, category, images, stock, color, occasion, featured } = body;
+    const { 
+      title, description, price, fabric, category, images, stock, color, occasion, featured,
+      mrp, discount, tags, design, borderType, blouseType, zari, colorFamily, sizes, isNew 
+    } = body;
 
     if (!title || !description || !price || !fabric || !category || !images || !color || !occasion) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -65,13 +68,23 @@ export async function POST(request) {
         title,
         description,
         price: parseFloat(price),
+        mrp: mrp ? parseFloat(mrp) : null,
+        discount: discount ? parseInt(discount) : null,
         fabric,
         category,
         images,
         stock: parseInt(stock) || 5,
         color,
         occasion,
-        featured: featured === true || featured === 'true'
+        featured: featured === true || featured === 'true',
+        isNew: isNew === true || isNew === 'true',
+        tags: tags || null,
+        design: design || null,
+        borderType: borderType || null,
+        blouseType: blouseType || null,
+        zari: zari || null,
+        colorFamily: colorFamily || null,
+        sizes: sizes || null
       }
     });
 
