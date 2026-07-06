@@ -540,7 +540,7 @@ export default function AdminDashboard() {
                             <button
                               onClick={() => {
                                 handleMarkSessionRecovered(session.id);
-                                const waUrl = `https://wa.me/91${session.phone}?text=Hi ${session.name || ''}, your dress "${session.productTitle}" is waiting! Look it up here: http://localhost:3000/product/${session.productId}`;
+                                const waUrl = `https://wa.me/91${session.phone}?text=Hi ${session.name || ''}, your dress "${session.productTitle}" is waiting! Look it up here: ${window.location.origin}/product/${session.productId}`;
                                 window.open(waUrl, '_blank');
                               }}
                               className={styles.addBtn}
