@@ -121,17 +121,36 @@ export default function ShopClient({ initialProducts }) {
     let items = [...initialProducts];
 
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      items = items.filter(
-        (p) =>
-          p.title.toLowerCase().includes(q) ||
-          p.fabric.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q)
-      );
+      const q = searchQuery.toLowerCase().trim();
+      items = items.filter((p) => {
+        const titleMatch = p.title.toLowerCase().includes(q);
+        const fabricMatch = p.fabric.toLowerCase().includes(q);
+        const descMatch = p.description.toLowerCase().includes(q);
+        const catMatch = p.category ? p.category.toLowerCase().includes(q) : false;
+        
+        // Custom check for singular terms like "saree" or "kurti" matching plural forms
+        let singularMatch = false;
+        if (q === 'saree' && p.category?.toLowerCase() === 'sarees') singularMatch = true;
+        if (q === 'kurti' && p.category?.toLowerCase() === 'kurtis') singularMatch = true;
+        if (q === 'dress' && p.category?.toLowerCase() === 'dresses') singularMatch = true;
+        if (q === 'lehenga' && p.category?.toLowerCase() === 'lehengas') singularMatch = true;
+        
+        return titleMatch || fabricMatch || descMatch || catMatch || singularMatch;
+      });
     }
 
     if (selectedCategory !== 'all') {
-      items = items.filter((p) => p.category?.toLowerCase() === selectedCategory.toLowerCase());
+      items = items.filter((p) => {
+        if (!p.category) return false;
+        const pCat = p.category.toLowerCase().trim();
+        const fCat = selectedCategory.toLowerCase().trim();
+        if (pCat === fCat) return true;
+        
+        // Normalize ending 's' for singular/plural matching
+        const pSingular = pCat.endsWith('s') ? pCat.slice(0, -1) : pCat;
+        const fSingular = fCat.endsWith('s') ? fCat.slice(0, -1) : fCat;
+        return pSingular === fSingular;
+      });
     }
 
     if (selectedFabric !== 'all') {
@@ -183,9 +202,10 @@ export default function ShopClient({ initialProducts }) {
   const sortedProducts = getFilteredAndSortedProducts();
 
   const SidebarContent = () => {
-    const isKurtis = selectedCategory.toLowerCase() === 'kurtis';
-    const isSarees = selectedCategory.toLowerCase() === 'sarees' || selectedCategory === 'all';
-    const isDresses = selectedCategory.toLowerCase() === 'dresses';
+    const catLower = selectedCategory.toLowerCase().trim();
+    const isKurtis = catLower === 'kurtis' || catLower === 'kurti';
+    const isSarees = catLower === 'sarees' || catLower === 'saree' || selectedCategory === 'all';
+    const isDresses = catLower === 'dresses' || catLower === 'dress';
 
     return (
       <div className={styles.sidebarInner}>
@@ -215,8 +235,21 @@ export default function ShopClient({ initialProducts }) {
             <label key={cat} className={styles.checkRow}>
               <input
                 type="checkbox"
-                checked={selectedCategory.toLowerCase() === cat.toLowerCase()}
-                onChange={() => updateFilter('category', selectedCategory.toLowerCase() === cat.toLowerCase() ? 'all' : cat)}
+                checked={
+                  selectedCategory.toLowerCase() === cat.toLowerCase() ||
+                  (cat.toLowerCase() === 'sarees' && selectedCategory.toLowerCase() === 'saree') ||
+                  (cat.toLowerCase() === 'kurtis' && selectedCategory.toLowerCase() === 'kurti') ||
+                  (cat.toLowerCase() === 'dresses' && selectedCategory.toLowerCase() === 'dress') ||
+                  (cat.toLowerCase() === 'lehengas' && selectedCategory.toLowerCase() === 'lehenga')
+                }
+                onChange={() => {
+                  const isActive = selectedCategory.toLowerCase() === cat.toLowerCase() ||
+                    (cat.toLowerCase() === 'sarees' && selectedCategory.toLowerCase() === 'saree') ||
+                    (cat.toLowerCase() === 'kurtis' && selectedCategory.toLowerCase() === 'kurti') ||
+                    (cat.toLowerCase() === 'dresses' && selectedCategory.toLowerCase() === 'dress') ||
+                    (cat.toLowerCase() === 'lehengas' && selectedCategory.toLowerCase() === 'lehenga');
+                  updateFilter('category', isActive ? 'all' : cat);
+                }}
                 className={styles.checkInput}
               />
               <span className={styles.checkLabel}>{cat === 'all' ? 'All Collections' : cat}</span>
