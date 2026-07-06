@@ -1,29 +1,51 @@
-.widget {
+.container {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  width: 56px;
-  height: 56px;
-  background-color: #25D366;
-  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 9999; /* Higher priority to float above PDP buttons and navigation bars */
+  pointer-events: none; /* Let clicks pass through gaps */
+}
+
+.whatsappWidget, .instagramWidget {
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
-  z-index: 999;
+  color: white;
   cursor: pointer;
+  pointer-events: auto; /* Re-enable pointer events for buttons */
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
 }
 
-.widget:hover {
+.whatsappWidget {
+  background-color: #25D366;
+  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
+}
+
+.instagramWidget {
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%,#d6249f 60%,#285AEB 90%);
+  box-shadow: 0 4px 16px rgba(214, 36, 159, 0.3);
+}
+
+.whatsappWidget:hover {
   transform: scale(1.08) translateY(-2px);
   box-shadow: 0 6px 20px rgba(37, 211, 102, 0.45);
 }
 
+.instagramWidget:hover {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 6px 20px rgba(214, 36, 159, 0.45);
+}
+
 .icon {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   position: relative;
   z-index: 2;
 }
@@ -31,7 +53,7 @@
 .pulse {
   position: absolute;
   inset: -4px;
-  background-color: rgba(37, 211, 102, 0.4);
+  background-color: rgba(37, 211, 102, 0.35);
   border-radius: 50%;
   animation: pulseAnim 2s infinite;
   z-index: 1;
@@ -39,7 +61,7 @@
 
 .tooltip {
   position: absolute;
-  right: 68px;
+  right: 66px;
   background-color: #333;
   color: white;
   padding: 6px 12px;
@@ -54,7 +76,8 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
-.widget:hover .tooltip {
+.whatsappWidget:hover .tooltip,
+.instagramWidget:hover .tooltip {
   opacity: 1;
   transform: translateX(0);
 }
@@ -74,15 +97,22 @@
   }
 }
 
+/* On mobile viewports, offset the widgets vertically above the bottom navigation bar */
 @media (max-width: 768px) {
-  .widget {
-    bottom: 16px;
+  .container {
+    bottom: 76px; /* Offset above the 56px bottom navigation height */
     right: 16px;
-    width: 48px;
-    height: 48px;
+    gap: 12px;
+  }
+  .whatsappWidget, .instagramWidget {
+    width: 46px;
+    height: 46px;
   }
   .icon {
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
+  }
+  .tooltip {
+    display: none; /* Hide hover tooltips on mobile touch screens */
   }
 }
