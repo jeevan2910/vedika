@@ -117,6 +117,7 @@ h1, h2, h3, h4, h5, h6 {
 .gold-text {
   background: linear-gradient(135deg, #aa6c0f 0%, #d4af37 50%, #c17f1d 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
 }
