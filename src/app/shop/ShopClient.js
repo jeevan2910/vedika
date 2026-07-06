@@ -476,29 +476,31 @@ export default function ShopClient({ initialProducts }) {
         </div>
 
         {/* Shop By Occasion Circle Navigation */}
-        <div className={styles.occasionsRow}>
-          <div
-            className={`${styles.occasionCircle} ${selectedOccasion === 'all' ? styles.activeOccasion : ''}`}
-            onClick={() => updateFilter('occasion', 'all')}
-          >
-            <div className={styles.circle}>
-              <div style={{ fontStyle: 'italic', fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--primary)' }}>All</div>
-            </div>
-            <span className={styles.circleName}>All Sarees</span>
-          </div>
-          {occasionCircles.map((occ, idx) => (
+        {(selectedCategory === 'all' || selectedCategory.toLowerCase() === 'sarees' || selectedCategory.toLowerCase() === 'saree') && !searchQuery && (
+          <div className={styles.occasionsRow}>
             <div
-              key={idx}
-              className={`${styles.occasionCircle} ${selectedOccasion === occ.name ? styles.activeOccasion : ''}`}
-              onClick={() => updateFilter('occasion', occ.name)}
+              className={`${styles.occasionCircle} ${selectedOccasion === 'all' ? styles.activeOccasion : ''}`}
+              onClick={() => updateFilter('occasion', 'all')}
             >
               <div className={styles.circle}>
-                <img src={occ.image} alt={occ.name} className={styles.circleImg} />
+                <div style={{ fontStyle: 'italic', fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--primary)' }}>All</div>
               </div>
-              <span className={styles.circleName}>{occ.name}</span>
+              <span className={styles.circleName}>All Sarees</span>
             </div>
-          ))}
-        </div>
+            {occasionCircles.map((occ, idx) => (
+              <div
+                key={idx}
+                className={`${styles.occasionCircle} ${selectedOccasion === occ.name ? styles.activeOccasion : ''}`}
+                onClick={() => updateFilter('occasion', occ.name)}
+              >
+                <div className={styles.circle}>
+                  <img src={occ.image} alt={occ.name} className={styles.circleImg} />
+                </div>
+                <span className={styles.circleName}>{occ.name}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Mobile Filter Toggle */}
         <div className={styles.mobileFilterBar}>
