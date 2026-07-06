@@ -51,6 +51,15 @@ export default function Header({ onCartOpen, onLoginOpen }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentCategory, setCurrentCategory] = useState('all');
+  const [currentSort, setCurrentSort] = useState('');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const urlParams = new URLSearchParams(window.location.search);
+    setCurrentCategory(urlParams.get('category') || 'all');
+    setCurrentSort(urlParams.get('sort') || '');
+  }, [pathname]);
 
   const placeholders = [
     "Search Ikkat Sarees, Linen...",
@@ -216,15 +225,27 @@ export default function Header({ onCartOpen, onLoginOpen }) {
 
         {/* Mobile Horizontal scrollable category options (User can see options clearly, no three-dashes menu required!) */}
         <div className={styles.mobileCategoryScroll}>
-          {NAV_ITEMS.map((item, idx) => (
-            <Link 
-              key={idx} 
-              href={item.href} 
-              className={`${styles.mobileCategoryTab} ${pathname === item.href ? styles.mobileCategoryTabActive : ''}`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {NAV_ITEMS.map((item, idx) => {
+            const isTabActive = (() => {
+              if (item.href === '/shop?sort=newest') {
+                return pathname === '/shop' && currentSort === 'newest';
+              }
+              const itemCat = item.href.split('category=')[1];
+              if (itemCat) {
+                return pathname === '/shop' && currentCategory.toLowerCase() === itemCat.toLowerCase();
+              }
+              return pathname === item.href;
+            })();
+            return (
+              <Link 
+                key={idx} 
+                href={item.href} 
+                className={`${styles.mobileCategoryTab} ${isTabActive ? styles.mobileCategoryTabActive : ''}`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </div>
 
       </div>
