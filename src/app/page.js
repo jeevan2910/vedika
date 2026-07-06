@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import HeroSlider from '@/components/HeroSlider/HeroSlider';
 import { Star } from 'lucide-react';
+import Newsletter from '@/components/Newsletter/Newsletter';
 import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -74,7 +75,7 @@ export default async function Home() {
             <h2 className="section-title">Curated Heritage Collections</h2>
             <div className="divider-gold" />
           </div>
-          <div className={styles.categoriesGrid}>
+          <div className={`${styles.categoriesGrid} reveal-on-scroll`}>
             {categories.map((cat, i) => (
               <Link href={cat.link} key={i} className={styles.categoryCard}>
                 <img src={cat.image} alt={cat.name} className={styles.categoryImg} loading="lazy" />
@@ -100,7 +101,7 @@ export default async function Home() {
             <Link href="/shop?sort=newest" className="btn-outline-gold" style={{ fontSize: '0.8rem', padding: '6px 14px' }}>View All →</Link>
           </div>
           
-          <div className={styles.arrivalsRow}>
+          <div className={`${styles.arrivalsRow} reveal-on-scroll`}>
             {newArrivals.map((p) => (
               <Link href={`/product/${p.id}`} key={p.id} className={styles.myntraProductCard}>
                 <div className={styles.myntraImgWrap}>
@@ -145,7 +146,7 @@ export default async function Home() {
             <div className="divider-gold" />
           </div>
           
-          <div className={styles.myntraFeaturedGrid}>
+          <div className={`${styles.myntraFeaturedGrid} reveal-on-scroll`}>
             {featuredProducts.map((p) => (
               <Link href={`/product/${p.id}`} key={p.id} className={styles.myntraProductCard}>
                 <div className={styles.myntraImgWrap}>
@@ -186,7 +187,7 @@ export default async function Home() {
 
       {/* Brand Story */}
       <section className={styles.storySection}>
-        <div className={styles.storyGrid}>
+        <div className={`${styles.storyGrid} reveal-on-scroll`}>
           <div className={styles.storyImage}>
             <img src="/images/saree-gold.webp" alt="Vedhika Heritage" />
           </div>
@@ -212,10 +213,13 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Guest List Lead Capture */}
+      <Newsletter />
+
       {/* Collection Banners */}
       <section className={`section ${styles.bannersSection}`}>
         <div className="container">
-          <div className={styles.bannersRow}>
+          <div className={`${styles.bannersRow} reveal-on-scroll`}>
             {banners.map((b, i) => (
               <Link href={b.link} key={i} className={styles.banner}>
                 <img src={b.image} alt={b.title} className={styles.bannerImg} loading="lazy" />
@@ -237,7 +241,7 @@ export default async function Home() {
             <h2 className="section-title">What Our Customers Say</h2>
             <div className="divider-gold" />
           </div>
-          <div className={styles.testimonialsGrid}>
+          <div className={`${styles.testimonialsGrid} reveal-on-scroll`}>
             {testimonials.map((t, i) => (
               <div key={i} className={styles.testimonialCard}>
                 <div className={styles.stars}>★★★★★</div>

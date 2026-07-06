@@ -9,27 +9,27 @@ export default function HeroSlider() {
   const slides = [
     {
       image: '/images/hero-saree.webp',
-      subtitle: 'Vedhika Thread Affairs',
-      title: 'Elegance in Every Pleat',
-      desc: 'Indulge in the luxury of hand-loomed heritage sarees. Pure mulberry silks, real gold zari borders, and timeless designs handcrafted for your special moments.',
+      subtitle: 'Vedhika',
+      title: 'Thread Affairs • Est. 2026',
+      desc: 'Handcrafted heritage, woven for the modern wardrobe. Explore our exclusive collection of timeless, artisan-made handlooms.',
       ctaText: 'Explore Collection',
       ctaLink: '/shop'
     },
     {
       image: '/images/saree-crimson.webp',
-      subtitle: 'Pure Silk Heritage',
-      title: 'Timeless Bridal Weaves',
-      desc: 'Discover our signature Royal Crimson Kanjeevarams, woven with the finest mulberry silk and traditional gold patterns for the modern bride.',
-      ctaText: 'Shop Bridal',
+      subtitle: 'Artisan Weaves',
+      title: 'Pure Silk Masterpieces',
+      desc: 'Intricately handwoven bridal Kanjeevarams and Banarasi brocades from India\'s most prestigious looms. Made for generations.',
+      ctaText: 'Shop Pure Silk',
       ctaLink: '/shop?fabric=Kanjeevaram Silk'
     },
     {
       image: '/images/saree-green.webp',
-      subtitle: 'Minimalist Artisan Loom',
-      title: 'Breathable Casual Luxury',
-      desc: 'Lightweight hand-loomed linen and organic cotton sarees designed for everyday elegance and lightweight comfort.',
-      ctaText: 'Shop Linen',
-      ctaLink: '/shop?fabric=Linen'
+      subtitle: 'Virtual Studio',
+      title: 'Drape Sarees Digitally',
+      desc: 'Experience our interactive digital draping room. View fabric folds, borders, and colors on virtual models before making a choice.',
+      ctaText: 'Enter Studio',
+      ctaLink: '/draping'
     }
   ];
 

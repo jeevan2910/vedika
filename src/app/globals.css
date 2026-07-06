@@ -386,3 +386,28 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--accent);
   flex-shrink: 0;
 }
+
+/* === Antigravity Luxury Micro-Animations === */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-on-scroll-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Luxury micro-transition for active buttons */
+.btn-accent, .btn-secondary, .btn-outline-gold {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-accent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(193, 127, 29, 0.35);
+}
+

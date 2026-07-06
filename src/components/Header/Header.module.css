@@ -49,9 +49,11 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: var(--bg-primary);
-  border-bottom: 1px solid var(--border-light);
-  transition: box-shadow 0.3s ease;
+  background: rgba(252, 251, 249, 0.85); /* Translucent cream */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(171, 140, 82, 0.1);
+  transition: box-shadow 0.3s ease, background-color 0.3s ease;
 }
 
 .headerWrapperScrolled {

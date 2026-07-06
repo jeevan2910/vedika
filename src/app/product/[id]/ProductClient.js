@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useCustomer } from '@/context/CustomerContext';
-import { Heart, ShoppingBag, Truck, RefreshCw, Shield, MessageCircle, ChevronDown, Star, Minus, Plus } from 'lucide-react';
+import { Heart, ShoppingBag, Truck, RefreshCw, Shield, MessageCircle, ChevronDown, Star, Minus, Plus, Lock, Award } from 'lucide-react';
 import styles from '../product-detail.module.css';
 
 export default function ProductClient({ product, relatedProducts = [] }) {
@@ -177,9 +177,9 @@ export default function ProductClient({ product, relatedProducts = [] }) {
 
             {/* Trust Icons */}
             <div className={styles.trustRow}>
-              <div className={styles.trustItem}><Shield size={16} /> <span>Authentic Weave</span></div>
-              <div className={styles.trustItem}><Truck size={16} /> <span>Free Shipping</span></div>
-              <div className={styles.trustItem}><RefreshCw size={16} /> <span>Easy Returns</span></div>
+              <div className={styles.trustItem}><Shield size={16} /> <span>100% Authentic Handloom</span></div>
+              <div className={styles.trustItem}><Award size={16} /> <span>Artisan Certified</span></div>
+              <div className={styles.trustItem}><Lock size={16} /> <span>Secure Checkout</span></div>
             </div>
 
             {/* Tabs */}

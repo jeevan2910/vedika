@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Header from '@/components/Header/Header';
 import CartDrawer from '@/components/CartDrawer/CartDrawer';
@@ -27,6 +27,32 @@ export default function LayoutShell({ children }) {
 
   const [cartOpen, setCartOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+
+  // Dynamic Scroll Reveal Intersection Observer (Antigravity animations)
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('reveal-on-scroll-active');
+          }
+        });
+      },
+      { threshold: 0.05, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    // Give it a tiny delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      const elements = document.querySelectorAll('.reveal-on-scroll');
+      elements.forEach((el) => observer.observe(el));
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      const elements = document.querySelectorAll('.reveal-on-scroll');
+      elements.forEach((el) => observer.unobserve(el));
+    };
+  }, [pathname, success]);
 
   // Admin and API routes bypass the customer gate
   if (isAdmin || isApi) {
@@ -61,8 +87,9 @@ export default function LayoutShell({ children }) {
     }
   };
 
-  // If customer is not logged in, show the exclusive boutique entry gate
-  if (!isLoggedIn) {
+  // If customer is trying to checkout but is not logged in, show the exclusive boutique entry gate
+  const isCheckout = pathname.startsWith('/checkout');
+  if (isCheckout && !isLoggedIn) {
     return (
       <div className={styles.gatePage}>
         <div className={styles.gateCard}>
