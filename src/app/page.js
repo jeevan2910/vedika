@@ -11,14 +11,28 @@ export const dynamic = 'force-dynamic';
 export default async function Home() {
   let featuredProducts = [];
   let newArrivals = [];
+  let trendingProducts = [];
+  let personalSuggestions = [];
+
   try {
-    featuredProducts = await prisma.product.findMany({ where: { featured: true }, take: 4 });
-    newArrivals = await prisma.product.findMany({ where: { isNew: true }, take: 6, orderBy: { createdAt: 'desc' } });
+    const allProducts = await prisma.product.findMany({});
+    
+    // Sort and partition products dynamically
+    newArrivals = allProducts.filter(p => p.isNew).slice(0, 6);
+    featuredProducts = allProducts.filter(p => p.featured).slice(0, 4);
+    
+    // "Trending Now" - products with highest ratings (>= 4.4)
+    trendingProducts = allProducts
+      .filter(p => p.rating >= 4.4)
+      .slice(0, 6);
+
+    // "Personal Suggestions" - dynamic recommended grid
+    personalSuggestions = allProducts.slice(0, 8);
   } catch (e) {
     console.error('Failed to load products:', e);
   }
 
-  // Circular App Category items
+  // Circular Categories Strip (App UI style)
   const quickCategories = [
     { name: 'Kanjeevaram', image: '/images/cat-kanjeevaram.webp', link: '/shop?fabric=Kanjeevaram Silk' },
     { name: 'Banarasi', image: '/images/cat-banarasi.webp', link: '/shop?fabric=Banarasi Silk' },
@@ -29,11 +43,13 @@ export default async function Home() {
     { name: 'Lehengas', image: '/images/saree-crimson.webp', link: '/shop?category=Lehengas' },
   ];
 
-  const categories = [
-    { name: 'Kanjeevaram Silk', desc: 'Pure Mulberry Silk, Real Gold Zari', image: '/images/cat-kanjeevaram.webp', link: '/shop?fabric=Kanjeevaram Silk' },
-    { name: 'Banarasi Brocade', desc: 'Woven in the Heart of Varanasi', image: '/images/cat-banarasi.webp', link: '/shop?fabric=Banarasi Silk' },
-    { name: 'Linen & Cottons', desc: 'Breathable Everyday Elegance', image: '/images/cat-linen.webp', link: '/shop?fabric=Linen' },
-    { name: 'Organza & Georgette', desc: 'Sheer Grace, Timeless Beauty', image: '/images/cat-organza.webp', link: '/shop?fabric=Organza Silk' },
+  // Artisan spotlights craft data
+  const artisanSpotlights = [
+    { name: 'Jamdani Weave', desc: 'Sheer Mughal Artistry', image: '/images/cat-organza.webp', link: '/shop?category=Sarees&fabric=Organza Silk' },
+    { name: 'Kanjeevaram Loom', desc: 'Temple Town Gold Silk', image: '/images/cat-kanjeevaram.webp', link: '/shop?fabric=Kanjeevaram Silk' },
+    { name: 'Banarasi Brocade', desc: 'Varanasi Royal Heritage', image: '/images/cat-banarasi.webp', link: '/shop?fabric=Banarasi Silk' },
+    { name: 'Ikat Handloom', desc: 'Precision Tied Dyeing', image: '/images/saree-blue.webp', link: '/shop?category=Sarees' },
+    { name: 'Linen Weaves', desc: 'Breathable Casual Luxury', image: '/images/cat-linen.webp', link: '/shop?fabric=Linen' },
   ];
 
   const testimonials = [
@@ -42,11 +58,49 @@ export default async function Home() {
     { text: 'Amazing customer service on WhatsApp. They helped me choose the perfect saree. Pure silk, worth every rupee!', name: 'Meena Iyer', city: 'Chennai' },
   ];
 
-  const banners = [
-    { title: 'Bridal Kanjeevaram', image: '/images/saree-crimson.webp', link: '/shop?fabric=Kanjeevaram Silk' },
-    { title: 'Gold Banarasi', image: '/images/saree-gold.webp', link: '/shop?fabric=Banarasi Silk' },
-    { title: 'Everyday Linen', image: '/images/cat-linen.webp', link: '/shop?fabric=Linen' },
-  ];
+  const renderProductCard = (p) => {
+    const productImgs = p.images.split(',').map(s => s.trim()).filter(Boolean);
+    const primaryImg = productImgs[0] || '/images/placeholder.webp';
+    const secondaryImg = productImgs[1] || null;
+    const discountPercent = p.discount || (p.mrp && p.mrp > p.price ? Math.round(((p.mrp - p.price) / p.mrp) * 100) : 0);
+
+    return (
+      <Link href={`/product/${p.id}`} key={p.id} className={styles.myntraProductCard}>
+        <div className={styles.myntraImgWrap}>
+          {p.isNew && <span className={styles.badgeNew}>NEW</span>}
+          {p.stock <= 2 && <span className={styles.badgeUrgency}>ONLY {p.stock} LEFT!</span>}
+          
+          <img src={primaryImg} alt={p.title} className={styles.myntraProductImg} loading="lazy" />
+          {secondaryImg && (
+            <img src={secondaryImg} alt={p.title} className={styles.myntraProductImgHover} loading="lazy" />
+          )}
+          
+          {/* Rating Tag overlaying image */}
+          <div className={styles.ratingBadge}>
+            <span>{p.rating}</span>
+            <Star size={10} fill="currentColor" stroke="none" className={styles.starIcon} />
+            <span className={styles.ratingDivider}>|</span>
+            <span>{p.reviewsCount || 12}</span>
+          </div>
+        </div>
+        
+        <div className={styles.myntraProductInfo}>
+          <span className={styles.myntraFabric}>{p.fabric}</span>
+          <h3 className={styles.myntraTitle}>{p.title}</h3>
+          
+          <div className={styles.myntraPriceRow}>
+            <span className={styles.myntraPrice}>₹{p.price.toLocaleString('en-IN')}</span>
+            {p.mrp && p.mrp > p.price && (
+              <>
+                <span className={styles.myntraMrp}>₹{p.mrp.toLocaleString('en-IN')}</span>
+                <span className={styles.myntraDiscount}>({discountPercent}% OFF)</span>
+              </>
+            )}
+          </div>
+        </div>
+      </Link>
+    );
+  };
 
   return (
     <div style={{ flexGrow: 1, backgroundColor: '#fcfbf9' }}>
@@ -67,22 +121,41 @@ export default async function Home() {
 
       <HeroSlider />
 
-      {/* Categories Grid */}
-      <section className={`section ${styles.categoriesSection}`} style={{ padding: '40px 0' }}>
+      {/* 1. HORIZONTAL CAROUSEL: Trending Now */}
+      <section className={`section ${styles.arrivalsSection}`} style={{ padding: '40px 0' }}>
         <div className="container">
-          <div className="section-header" style={{ marginBottom: '32px' }}>
-            <span className="section-tag">Shop by Category</span>
-            <h2 className="section-title">Curated Heritage Collections</h2>
-            <div className="divider-gold" />
+          <div className={styles.arrivalsHeader} style={{ marginBottom: '24px' }}>
+            <div>
+              <span className="section-tag">Hot Sellers</span>
+              <h2 className="section-title" style={{ fontSize: '1.8rem' }}>Trending Now</h2>
+            </div>
+            <Link href="/shop?sort=rating" className="btn-outline-gold" style={{ fontSize: '0.8rem', padding: '6px 14px' }}>View All →</Link>
           </div>
-          <div className={`${styles.categoriesGrid} reveal-on-scroll`}>
-            {categories.map((cat, i) => (
-              <Link href={cat.link} key={i} className={styles.categoryCard}>
-                <img src={cat.image} alt={cat.name} className={styles.categoryImg} loading="lazy" />
-                <div className={styles.categoryOverlay}>
-                  <h3 className={styles.categoryName}>{cat.name}</h3>
-                  <p className={styles.categoryDesc}>{cat.desc}</p>
-                  <span className={styles.categoryBtn}>Explore →</span>
+          
+          <div className={`${styles.horizontalScrollRow} reveal-on-scroll`}>
+            {trendingProducts.map(renderProductCard)}
+          </div>
+        </div>
+      </section>
+
+      {/* 2. HORIZONTAL CAROUSEL: Artisan Spotlights */}
+      <section className={`section ${styles.artisanSection}`} style={{ padding: '40px 0', background: '#f5f2eb' }}>
+        <div className="container">
+          <div className={styles.arrivalsHeader} style={{ marginBottom: '24px' }}>
+            <div>
+              <span className="section-tag">Craft Spotlights</span>
+              <h2 className="section-title" style={{ fontSize: '1.8rem' }}>Artisan Spotlight</h2>
+            </div>
+          </div>
+          
+          <div className={`${styles.horizontalScrollRow} reveal-on-scroll`}>
+            {artisanSpotlights.map((art, idx) => (
+              <Link href={art.link} key={idx} className={styles.artisanCard}>
+                <img src={art.image} alt={art.name} className={styles.artisanImg} loading="lazy" />
+                <div className={styles.artisanOverlay}>
+                  <span className={styles.artisanSub}>Crafted Heritage</span>
+                  <h3 className={styles.artisanName}>{art.name}</h3>
+                  <p className={styles.artisanDesc}>{art.desc}</p>
                 </div>
               </Link>
             ))}
@@ -90,7 +163,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* New Arrivals (Horizontal Scroll Card List) */}
+      {/* New Arrivals Grid */}
       <section className={`section ${styles.arrivalsSection}`} style={{ padding: '40px 0' }}>
         <div className="container">
           <div className={styles.arrivalsHeader} style={{ marginBottom: '24px' }}>
@@ -102,85 +175,26 @@ export default async function Home() {
           </div>
           
           <div className={`${styles.arrivalsRow} reveal-on-scroll`}>
-            {newArrivals.map((p) => (
-              <Link href={`/product/${p.id}`} key={p.id} className={styles.myntraProductCard}>
-                <div className={styles.myntraImgWrap}>
-                  <span className={styles.badgeNew}>NEW</span>
-                  <img src={p.images.split(',')[0]} alt={p.title} className={styles.myntraProductImg} loading="lazy" />
-                  
-                  {/* Rating Tag overlaying image */}
-                  <div className={styles.ratingBadge}>
-                    <span>{p.rating}</span>
-                    <Star size={10} fill="currentColor" stroke="none" className={styles.starIcon} />
-                    <span className={styles.ratingDivider}>|</span>
-                    <span>{p.reviewsCount || 12}</span>
-                  </div>
-                </div>
-                
-                <div className={styles.myntraProductInfo}>
-                  <span className={styles.myntraFabric}>{p.fabric}</span>
-                  <h3 className={styles.myntraTitle}>{p.title}</h3>
-                  
-                  <div className={styles.myntraPriceRow}>
-                    <span className={styles.myntraPrice}>₹{p.price.toLocaleString('en-IN')}</span>
-                    {p.mrp && p.mrp > p.price && (
-                      <>
-                        <span className={styles.myntraMrp}>₹{p.mrp.toLocaleString('en-IN')}</span>
-                        <span className={styles.myntraDiscount}>({p.discount || Math.round(((p.mrp - p.price) / p.mrp) * 100)}% OFF)</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            ))}
+            {newArrivals.map(renderProductCard)}
           </div>
         </div>
       </section>
 
-      {/* Featured Products Grid */}
+      {/* 3. PERSONAL SUGGESTIONS: Recommended Grid */}
       <section className={`section ${styles.featuredSection}`} style={{ padding: '50px 0' }}>
         <div className="container">
           <div className="section-header" style={{ marginBottom: '32px' }}>
-            <span className="section-tag">Handpicked</span>
-            <h2 className="section-title">Featured Collection</h2>
+            <span className="section-tag">Custom Curation</span>
+            <h2 className="section-title">Personal Suggestions</h2>
             <div className="divider-gold" />
           </div>
           
-          <div className={`${styles.myntraFeaturedGrid} reveal-on-scroll`}>
-            {featuredProducts.map((p) => (
-              <Link href={`/product/${p.id}`} key={p.id} className={styles.myntraProductCard}>
-                <div className={styles.myntraImgWrap}>
-                  <span className={styles.productTag}>{p.category}</span>
-                  <img src={p.images.split(',')[0]} alt={p.title} className={styles.myntraProductImg} loading="lazy" />
-                  
-                  <div className={styles.ratingBadge}>
-                    <span>{p.rating}</span>
-                    <Star size={10} fill="currentColor" stroke="none" className={styles.starIcon} />
-                    <span className={styles.ratingDivider}>|</span>
-                    <span>{p.reviewsCount || 12}</span>
-                  </div>
-                </div>
-                
-                <div className={styles.myntraProductInfo}>
-                  <span className={styles.myntraFabric}>{p.fabric}</span>
-                  <h3 className={styles.myntraTitle}>{p.title}</h3>
-                  
-                  <div className={styles.myntraPriceRow}>
-                    <span className={styles.myntraPrice}>₹{p.price.toLocaleString('en-IN')}</span>
-                    {p.mrp && p.mrp > p.price && (
-                      <>
-                        <span className={styles.myntraMrp}>₹{p.mrp.toLocaleString('en-IN')}</span>
-                        <span className={styles.myntraDiscount}>({p.discount || Math.round(((p.mrp - p.price) / p.mrp) * 100)}% OFF)</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            ))}
+          <div className={`${styles.suggestionsGrid} reveal-on-scroll`}>
+            {personalSuggestions.map(renderProductCard)}
           </div>
           
           <div style={{ textAlign: 'center', marginTop: '40px' }}>
-            <Link href="/shop" className="btn-accent" style={{ padding: '12px 28px' }}>Shop the Collection →</Link>
+            <Link href="/shop" className="btn-accent" style={{ padding: '12px 28px' }}>Shop Full Catalog →</Link>
           </div>
         </div>
       </section>
@@ -215,23 +229,6 @@ export default async function Home() {
 
       {/* Guest List Lead Capture */}
       <Newsletter />
-
-      {/* Collection Banners */}
-      <section className={`section ${styles.bannersSection}`}>
-        <div className="container">
-          <div className={`${styles.bannersRow} reveal-on-scroll`}>
-            {banners.map((b, i) => (
-              <Link href={b.link} key={i} className={styles.banner}>
-                <img src={b.image} alt={b.title} className={styles.bannerImg} loading="lazy" />
-                <div className={styles.bannerOverlay}>
-                  <h3 className={styles.bannerTitle}>{b.title}</h3>
-                  <span className={styles.bannerLink}>Explore Collection →</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Testimonials */}
       <section className={`section ${styles.testimonialsSection}`}>

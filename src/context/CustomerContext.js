@@ -6,6 +6,7 @@ const CustomerContext = createContext(null);
 
 export function CustomerProvider({ children }) {
   const [customer, setCustomer] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     // Load customer from localStorage on mount
@@ -30,6 +31,7 @@ export function CustomerProvider({ children }) {
       if (res.ok && data.success) {
         setCustomer(data.customer);
         localStorage.setItem('vta_customer', JSON.stringify(data.customer));
+        setShowLoginModal(false); // Close login modal on success!
         return { success: true };
       } else {
         return { success: false, error: data.error || 'Login failed' };
@@ -48,7 +50,7 @@ export function CustomerProvider({ children }) {
   };
 
   return (
-    <CustomerContext.Provider value={{ customer, login, logout, isLoggedIn: !!customer }}>
+    <CustomerContext.Provider value={{ customer, login, logout, isLoggedIn: !!customer, showLoginModal, setShowLoginModal }}>
       {children}
     </CustomerContext.Provider>
   );

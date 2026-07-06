@@ -17,7 +17,7 @@ export default function LayoutShell({ children }) {
   const isAdmin = pathname.startsWith('/admin');
   const isApi = pathname.startsWith('/api');
   
-  const { customer, login, isLoggedIn } = useCustomer();
+  const { customer, login, isLoggedIn, showLoginModal, setShowLoginModal } = useCustomer();
   
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
@@ -26,7 +26,6 @@ export default function LayoutShell({ children }) {
   const [success, setSuccess] = useState(false);
 
   const [cartOpen, setCartOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
 
   // Dynamic Scroll Reveal Intersection Observer (Antigravity animations)
   useEffect(() => {
@@ -166,7 +165,7 @@ export default function LayoutShell({ children }) {
     <>
       <Header 
         onCartOpen={() => setCartOpen(true)} 
-        onLoginOpen={() => setLoginOpen(true)} 
+        onLoginOpen={() => setShowLoginModal(true)} 
       />
       <main style={{ minHeight: '70vh', display: 'flex', flexDirection: 'column', paddingBottom: '30px' }}>
         {children}
@@ -174,10 +173,10 @@ export default function LayoutShell({ children }) {
       <Footer />
       <BottomNavigation 
         onCartOpen={() => setCartOpen(true)} 
-        onLoginOpen={() => setLoginOpen(true)} 
+        onLoginOpen={() => setShowLoginModal(true)} 
       />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
-      <CustomerLoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
+      <CustomerLoginModal open={showLoginModal} onClose={() => setShowLoginModal(false)} />
       <WhatsAppWidget />
     </>
   );

@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, createContext, useContext } from 'react';
+import { useCustomer } from '@/context/CustomerContext';
 
 const WishlistContext = createContext(null);
 
 export function WishlistProvider({ children }) {
+  const { isLoggedIn, setShowLoginModal } = useCustomer();
   const [wishlist, setWishlist] = useState(() => {
     if (typeof window !== 'undefined') {
       try { return JSON.parse(localStorage.getItem('vta_wishlist') || '[]'); } catch { return []; }
@@ -13,6 +15,10 @@ export function WishlistProvider({ children }) {
   });
 
   const toggle = (product) => {
+    if (!isLoggedIn) {
+      setShowLoginModal(true);
+      return;
+    }
     setWishlist((prev) => {
       const exists = prev.find((p) => p.id === product.id);
       const next = exists ? prev.filter((p) => p.id !== product.id) : [...prev, product];

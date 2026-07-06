@@ -2,16 +2,19 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useCustomer } from '@/context/CustomerContext';
-import { Heart, ShoppingBag, Truck, RefreshCw, Shield, MessageCircle, ChevronDown, Star, Minus, Plus, Lock, Award } from 'lucide-react';
+import { Heart, ShoppingBag, Shield, MessageCircle, ChevronDown, Star, Minus, Plus, Lock, Award, ArrowRight } from 'lucide-react';
 import styles from '../product-detail.module.css';
 
 export default function ProductClient({ product, relatedProducts = [] }) {
+  const router = useRouter();
   const { addToCart } = useCart();
   const { toggle, isWishlisted } = useWishlist();
-  const { customer } = useCustomer();
+  const { customer, isLoggedIn, setShowLoginModal } = useCustomer();
+  
   const images = product.images?.split(',').map(s => s.trim()).filter(Boolean) || [];
   const [mainImage, setMainImage] = useState(images[0] || '/images/placeholder.webp');
   const isSaree = product.category?.toLowerCase() === 'sarees';
@@ -56,7 +59,42 @@ export default function ProductClient({ product, relatedProducts = [] }) {
   const selectedBlouse = blouseOptions.find(b => b.label === blouseStyle) || blouseOptions[0];
   const finalPrice = isSaree ? (product.price + selectedBlouse.extra) : product.price;
 
-  const handleAddToCart = () => {
+  // Particle fly to cart animation
+  const triggerFlyAnimation = (e) => {
+    const cartBtn = document.querySelector('[aria-label="Cart"]') || document.querySelector('.Header_badge__...');
+    if (!cartBtn) return;
+
+    const rectCart = cartBtn.getBoundingClientRect();
+    const particle = document.createElement('div');
+    particle.className = 'cartFlyParticle';
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+
+    particle.style.left = `${startX}px`;
+    particle.style.top = `${startY}px`;
+
+    const diffX = rectCart.left - startX + (rectCart.width / 2);
+    const diffY = rectCart.top - startY + (rectCart.height / 2);
+
+    particle.style.setProperty('--fly-x', `${diffX}px`);
+    particle.style.setProperty('--fly-y', `${diffY}px`);
+
+    document.body.appendChild(particle);
+
+    setTimeout(() => {
+      particle.remove();
+    }, 800);
+  };
+
+  const handleAddToCart = (e) => {
+    if (!isLoggedIn) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    triggerFlyAnimation(e);
+
     addToCart({
       id: product.id,
       title: product.title,
@@ -67,6 +105,22 @@ export default function ProductClient({ product, relatedProducts = [] }) {
     });
     setAddedMsg('Added to bag!');
     setTimeout(() => setAddedMsg(''), 2000);
+  };
+
+  const handleBuyNow = (e) => {
+    if (!isLoggedIn) {
+      setShowLoginModal(true);
+      return;
+    }
+    addToCart({
+      id: product.id,
+      title: product.title,
+      price: finalPrice,
+      image: images[0],
+      blouseStyle: isSaree ? blouseStyle : `Size: ${selectedSize}`,
+      quantity
+    });
+    router.push('/checkout');
   };
 
   const tabs = [
@@ -109,6 +163,14 @@ export default function ProductClient({ product, relatedProducts = [] }) {
           <div className={styles.details}>
             <span className={styles.fabricTag}>{product.fabric}</span>
             <h1 className={styles.title}>{product.title}</h1>
+
+            {/* Sizing & Scarcity Badges */}
+            <div className={styles.highlightBadges}>
+              <span className={styles.artistryBadge}>✨ Handcrafted Artistry Verified</span>
+              {product.stock <= 2 && (
+                <span className={styles.scarcityBadge}>🔥 Only {product.stock} Left in Stock!</span>
+              )}
+            </div>
 
             <div className={styles.ratingRow}>
               <div className={styles.stars}>
@@ -166,14 +228,22 @@ export default function ProductClient({ product, relatedProducts = [] }) {
 
             {/* CTA Buttons */}
             <div className={styles.ctaRow}>
-              <button onClick={handleAddToCart} className={styles.addToCartBtn}>
+              <button onClick={(e) => handleAddToCart(e)} className={styles.addToCartBtn}>
                 <ShoppingBag size={18} /> Add to Bag
               </button>
-              <a href={`https://wa.me/919030496646?text=Hi, I'm interested in ${product.title} (₹${product.price.toLocaleString('en-IN')})`} target="_blank" rel="noopener noreferrer" className={styles.whatsappBtn}>
-                <MessageCircle size={18} /> Chat to Order
-              </a>
+              <button onClick={(e) => handleBuyNow(e)} className={styles.buyNowBtn}>
+                ⚡ Buy Now
+              </button>
             </div>
             {addedMsg && <p className={styles.addedMsg}>✓ {addedMsg}</p>}
+
+            {/* Brand/Collection Discoverability link */}
+            <div className={styles.discoverLinkWrap}>
+              <span>Love this weave? </span>
+              <Link href={`/shop?fabric=${encodeURIComponent(product.fabric)}`} className={styles.discoverLink}>
+                View more {product.fabric} designs <ArrowRight size={13} style={{ display: 'inline', verticalAlign: 'middle' }} />
+              </Link>
+            </div>
 
             {/* Trust Icons */}
             <div className={styles.trustRow}>
@@ -219,27 +289,16 @@ export default function ProductClient({ product, relatedProducts = [] }) {
             )}
           </div>
         </div>
+      </div>
 
-        {/* Related Products */}
-        {relatedProducts.length > 0 && (
-          <section className={styles.relatedSection}>
-            <h2 className={styles.relatedTitle}>You May Also Like</h2>
-            <div className={styles.relatedGrid}>
-              {relatedProducts.map(p => (
-                <Link href={`/product/${p.id}`} key={p.id} className={styles.relatedCard}>
-                  <div className={styles.relatedImgWrap}>
-                    <img src={p.images.split(',')[0]} alt={p.title} className={styles.relatedImg} />
-                  </div>
-                  <div className={styles.relatedInfo}>
-                    <span className={styles.relatedFabric}>{p.fabric}</span>
-                    <h3 className={styles.relatedName}>{p.title}</h3>
-                    <span className={styles.relatedPrice}>₹{p.price.toLocaleString('en-IN')}</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+      {/* Mobile Sticky Bottom CTA Bar (Thumb-optimized reach zone, equal 50% split width) */}
+      <div className={styles.mobileStickyCtas}>
+        <button onClick={(e) => handleAddToCart(e)} className={styles.mobileAddToCartBtn}>
+          <ShoppingBag size={15} style={{ marginRight: '6px', display: 'inline' }} /> ADD TO BAG
+        </button>
+        <button onClick={(e) => handleBuyNow(e)} className={styles.mobileBuyNowBtn}>
+          BUY NOW
+        </button>
       </div>
     </div>
   );

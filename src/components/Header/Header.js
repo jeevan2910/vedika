@@ -46,11 +46,27 @@ export default function Header({ onCartOpen, onLoginOpen }) {
   const pathname = usePathname();
   const router = useRouter();
   const { cartCount } = useCart();
-  const { customer, logout, isLoggedIn } = useCustomer();
+  const { customer, logout, isLoggedIn, setShowLoginModal } = useCustomer();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const placeholders = [
+    "Search Ikkat Sarees, Linen...",
+    "Search Kanjeevaram Silk...",
+    "Search Banarasi Brocades...",
+    "Search for Kurtis & Sets...",
+    "Search designer dresses, lehengas..."
+  ];
+  const [placeholderIdx, setPlaceholderIdx] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPlaceholderIdx((prev) => (prev + 1) % placeholders.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
@@ -150,7 +166,7 @@ export default function Header({ onCartOpen, onLoginOpen }) {
             <Search size={16} className={styles.searchIconInline} />
             <input 
               type="text" 
-              placeholder="Search for products, brands and more..." 
+              placeholder={placeholders[placeholderIdx]} 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={styles.desktopSearchInput}
@@ -190,7 +206,7 @@ export default function Header({ onCartOpen, onLoginOpen }) {
             <Search size={16} className={styles.searchIconInline} />
             <input 
               type="text" 
-              placeholder="Search for sarees, kurtis, dresses..." 
+              placeholder={placeholders[placeholderIdx]} 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={styles.mobileSearchInput}

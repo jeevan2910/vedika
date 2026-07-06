@@ -520,20 +520,30 @@ export default function ShopClient({ initialProducts }) {
               </div>
 
             {sortedProducts.length > 0 ? (
-              <div className={styles.productsGrid}>
+            <div className={styles.productsGrid}>
                 {sortedProducts.map((product) => {
                    const wishlisted = isWishlisted(product.id);
                    const discountPercent = product.discount || (product.mrp && product.mrp > product.price ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : 0);
                    return (
-                     <div key={product.id} className={pageStyles.myntraProductCard} style={{ position: 'relative', flex: 'unset' }}>
-                       <Link href={`/product/${product.id}`} className={pageStyles.myntraImgWrap}>
-                         {product.isNew && <span className={pageStyles.badgeNew}>NEW</span>}
-                         <img
-                           src={product.images.split(',')[0]}
-                           alt={product.title}
-                           className={pageStyles.myntraProductImg}
-                           loading="lazy"
-                         />
+                      <div key={product.id} className={pageStyles.myntraProductCard} style={{ position: 'relative', flex: 'unset' }}>
+                        <Link href={`/product/${product.id}`} className={pageStyles.myntraImgWrap}>
+                          {product.isNew && <span className={pageStyles.badgeNew}>NEW</span>}
+                          {product.stock <= 2 && <span className={pageStyles.badgeUrgency}>ONLY {product.stock} LEFT!</span>}
+                          
+                          <img
+                            src={product.images.split(',')[0]}
+                            alt={product.title}
+                            className={pageStyles.myntraProductImg}
+                            loading="lazy"
+                          />
+                          {product.images.split(',')[1] && (
+                            <img
+                              src={product.images.split(',')[1].trim()}
+                              alt={product.title}
+                              className={pageStyles.myntraProductImgHover}
+                              loading="lazy"
+                            />
+                          )}
                          
                          {/* Rating Tag overlaying image */}
                          <div className={pageStyles.ratingBadge}>
