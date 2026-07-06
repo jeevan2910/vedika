@@ -17,7 +17,7 @@ export default function LayoutShell({ children }) {
   const isAdmin = pathname.startsWith('/admin');
   const isApi = pathname.startsWith('/api');
   
-  const { customer, login, isLoggedIn, showLoginModal, setShowLoginModal } = useCustomer();
+  const { customer, login, isLoggedIn, showLoginModal, setShowLoginModal, preventClose, setPreventClose } = useCustomer();
   
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
@@ -26,6 +26,17 @@ export default function LayoutShell({ children }) {
   const [success, setSuccess] = useState(false);
 
   const [cartOpen, setCartOpen] = useState(false);
+
+  // Trigger login modal after 15 seconds browsing on the homepage if they are not logged in
+  useEffect(() => {
+    if (pathname === '/' && !isLoggedIn) {
+      const timer = setTimeout(() => {
+        setPreventClose(true);
+        setShowLoginModal(true);
+      }, 15000);
+      return () => clearTimeout(timer);
+    }
+  }, [pathname, isLoggedIn, setShowLoginModal, setPreventClose]);
 
   // Dynamic Scroll Reveal Intersection Observer (Antigravity animations)
   useEffect(() => {

@@ -7,6 +7,7 @@ const CustomerContext = createContext(null);
 export function CustomerProvider({ children }) {
   const [customer, setCustomer] = useState(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [preventClose, setPreventClose] = useState(false);
 
   useEffect(() => {
     // Load customer from localStorage on mount
@@ -22,16 +23,17 @@ export function CustomerProvider({ children }) {
 
   const login = async (phone, name) => {
     try {
-      const res = await fetch('/api/auth/customer', {
+      const res = await fetch('/api/users/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, name })
+        body: JSON.stringify({ name, phoneNumber: phone, createdAt: new Date() })
       });
       const data = await res.json();
       if (res.ok && data.success) {
         setCustomer(data.customer);
         localStorage.setItem('vta_customer', JSON.stringify(data.customer));
         setShowLoginModal(false); // Close login modal on success!
+        setPreventClose(false); // Reset preventClose state
         return { success: true };
       } else {
         return { success: false, error: data.error || 'Login failed' };
@@ -50,7 +52,11 @@ export function CustomerProvider({ children }) {
   };
 
   return (
-    <CustomerContext.Provider value={{ customer, login, logout, isLoggedIn: !!customer, showLoginModal, setShowLoginModal }}>
+    <CustomerContext.Provider value={{ 
+      customer, login, logout, isLoggedIn: !!customer, 
+      showLoginModal, setShowLoginModal, 
+      preventClose, setPreventClose 
+    }}>
       {children}
     </CustomerContext.Provider>
   );

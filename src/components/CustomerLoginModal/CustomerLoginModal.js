@@ -6,7 +6,7 @@ import { X, Phone, User, CheckCircle2 } from 'lucide-react';
 import styles from './CustomerLoginModal.module.css';
 
 export default function CustomerLoginModal({ open, onClose }) {
-  const { login } = useCustomer();
+  const { login, preventClose } = useCustomer();
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
@@ -19,6 +19,12 @@ export default function CustomerLoginModal({ open, onClose }) {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    if (!name) {
+      setError('Full Name is required');
+      setLoading(false);
+      return;
+    }
 
     if (!phone) {
       setError('Phone number is required');
@@ -51,11 +57,13 @@ export default function CustomerLoginModal({ open, onClose }) {
 
   return (
     <>
-      <div className={styles.overlay} onClick={onClose} />
+      <div className={styles.overlay} onClick={() => !preventClose && onClose()} />
       <div className={styles.modal}>
-        <button className={styles.closeBtn} onClick={onClose} aria-label="Close modal">
-          <X size={20} />
-        </button>
+        {!preventClose && (
+          <button className={styles.closeBtn} onClick={onClose} aria-label="Close modal">
+            <X size={20} />
+          </button>
+        )}
 
         {success ? (
           <div className={styles.successBlock}>
@@ -66,28 +74,29 @@ export default function CustomerLoginModal({ open, onClose }) {
         ) : (
           <div className={styles.formBlock}>
             <div className={styles.logoCircle}>🧵</div>
-            <h3 className={styles.modalTitle}>Sign In / Register</h3>
-            <p className={styles.modalSubtitle}>Join Vedhika Thread Affairs using your phone number</p>
+            <h3 className={styles.modalTitle}>Unlock Exclusive Access</h3>
+            <p className={styles.modalSubtitle}>Join Vedhika Thread Affairs to view our exclusive handloom collection</p>
 
             {error && <div className={styles.errorAlert}>{error}</div>}
 
             <form onSubmit={handleSubmit} className={styles.form}>
               <div className={styles.formGroup}>
-                <label className={styles.label}>Name (Optional)</label>
+                <label className={styles.label}>Full Name *</label>
                 <div className={styles.inputWrap}>
                   <User size={16} className={styles.inputIcon} />
                   <input
                     type="text"
+                    required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter your name"
+                    placeholder="Enter your full name"
                     className={styles.input}
                   />
                 </div>
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.label}>Phone Number *</label>
+                <label className={styles.label}>Mobile Number *</label>
                 <div className={styles.inputWrap}>
                   <Phone size={16} className={styles.inputIcon} />
                   <input
@@ -107,7 +116,7 @@ export default function CustomerLoginModal({ open, onClose }) {
                 disabled={loading} 
                 className={styles.submitBtn}
               >
-                {loading ? 'Logging in...' : 'Access My Account'}
+                {loading ? 'Unlocking...' : 'Unlock Exclusive Collection'}
               </button>
             </form>
             <p className={styles.note}>We respect your privacy. Your phone number is saved securely in our database.</p>

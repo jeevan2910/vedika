@@ -13,7 +13,14 @@ export default function ProductClient({ product, relatedProducts = [] }) {
   const router = useRouter();
   const { addToCart } = useCart();
   const { toggle, isWishlisted } = useWishlist();
-  const { customer, isLoggedIn, setShowLoginModal } = useCustomer();
+  const { customer, isLoggedIn, setShowLoginModal, setPreventClose } = useCustomer();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setPreventClose(true);
+      setShowLoginModal(true);
+    }
+  }, [isLoggedIn, setShowLoginModal, setPreventClose]);
   
   const images = product.images?.split(',').map(s => s.trim()).filter(Boolean) || [];
   const [mainImage, setMainImage] = useState(images[0] || '/images/placeholder.webp');
